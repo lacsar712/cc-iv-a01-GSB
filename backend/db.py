@@ -23,6 +23,24 @@ CREATE TABLE IF NOT EXISTS iv_scans (
     created_at timestamptz NOT NULL,
     processed_at timestamptz
 );
+ALTER TABLE iv_scans ADD COLUMN IF NOT EXISTS qr_code text;
+CREATE TABLE IF NOT EXISTS string_roster (
+    string_code text PRIMARY KEY
+);
+CREATE TABLE IF NOT EXISTS string_labels (
+    id serial PRIMARY KEY,
+    string_code text NOT NULL UNIQUE,
+    qr_code text NOT NULL UNIQUE,
+    labeled_by text NOT NULL,
+    labeled_at timestamptz NOT NULL
+);
+CREATE TABLE IF NOT EXISTS scan_rejections (
+    id serial PRIMARY KEY,
+    string_code text NOT NULL,
+    reason text NOT NULL,
+    attempted_by text NOT NULL,
+    attempted_at timestamptz NOT NULL
+);
 CREATE OR REPLACE FUNCTION notify_iv_scan() RETURNS trigger AS $$
 BEGIN
   PERFORM pg_notify('iv_scan_new', NEW.id::text);
